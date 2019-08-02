@@ -1,0 +1,10 @@
+version: '3.4'
+
+services:
+  infinitam:
+    build: .
+    volumes:
+      - ./Files:/app/Files
+    environment:
+      - DISPLAY=192.168.0.254:0.0
+    network_mode: "host"
