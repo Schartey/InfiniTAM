@@ -5,7 +5,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 PROJECT(infinitam)
-
+set(CMAKE_VERBOSE_MAKEFILE ON)
 #################################
 # Specify the CMake module path #
 #################################
@@ -50,3 +50,5 @@ ADD_SUBDIRECTORY(InputSource)
 ADD_SUBDIRECTORY(ITMLib)
 ADD_SUBDIRECTORY(MiniSlamGraphLib)
 ADD_SUBDIRECTORY(ORUtils)
+ADD_SUBDIRECTORY(ServerUtils)
+

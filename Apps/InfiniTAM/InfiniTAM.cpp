@@ -17,6 +17,7 @@
 #include "../../ITMLib/Core/ITMBasicEngine.h"
 #include "../../ITMLib/Core/ITMBasicSurfelEngine.h"
 #include "../../ITMLib/Core/ITMMultiEngine.h"
+#include "../../InputSource/TCPImageSourceEngine.h"
 
 using namespace InfiniTAM::Engine;
 using namespace InputSource;
@@ -46,26 +47,51 @@ static void CreateDefaultImageSource(ImageSourceEngine* & imageSource, IMUSource
 
 	if ((imageSource == NULL) && (filename2 != NULL))
 	{
-		printf("using rgb images: %s\nusing depth images: %s\n", filename1, filename2);
-		if (filename_imu == NULL)
-		{
-			ImageMaskPathGenerator pathGenerator(filename1, filename2);
-			imageSource = new ImageFileReader<ImageMaskPathGenerator>(calibFile, pathGenerator);
-		}
-		else
-		{
-			printf("using imu data: %s\n", filename_imu);
-			imageSource = new RawFileReader(calibFile, filename1, filename2, Vector2i(320, 240), 0.5f);
-			imuSource = new IMUSourceEngine(filename_imu);
-		}
+        char* p;
+        int port = strtol(filename2, &p, 10);
 
-		if (imageSource->getDepthImageSize().x == 0)
-		{
-			delete imageSource;
-			if (imuSource != NULL) delete imuSource;
-			imuSource = NULL;
-			imageSource = NULL;
-		}
+        if (*p)
+        {
+            printf("using rgb images: %s\nusing depth images: %s\n", filename1, filename2);
+            if (filename_imu == NULL)
+            {
+                ImageMaskPathGenerator pathGenerator(filename1, filename2);
+                imageSource = new ImageFileReader<ImageMaskPathGenerator>(calibFile, pathGenerator);
+            }
+            else
+            {
+                printf("using imu data: %s\n", filename_imu);
+                imageSource = new RawFileReader(calibFile, filename1, filename2, Vector2i(320, 240), 0.5f);
+                imuSource = new IMUSourceEngine(filename_imu);
+            }
+
+            if (imageSource->getDepthImageSize().x == 0)
+            {
+                delete imageSource;
+                if (imuSource != NULL) delete imuSource;
+                imuSource = NULL;
+                imageSource = NULL;
+            }
+        }
+        else
+        {
+            printf("using network images: %s:%s\n", filename1, filename2);
+
+            ImageHostPathGenerator pathGenerator(filename1, port);
+            TCPImageSourceEngine<ImageHostPathGenerator>* source = new TCPImageSourceEngine<ImageHostPathGenerator>(calibFile, pathGenerator);
+
+            if (!source->IsRunning())
+            {
+                delete imageSource;
+                if (imuSource != NULL) delete imuSource;
+                imuSource = NULL;
+                imageSource = NULL;
+            }
+            else
+            {
+                imageSource = source;
+            }
+        }
 	}
 
 	if ((imageSource == NULL) && (filename1 != NULL) && (filename_imu == NULL))
