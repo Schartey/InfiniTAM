@@ -18,10 +18,18 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 INCLUDE(${PROJECT_SOURCE_DIR}/cmake/OfferROSSupport.cmake)
 
+######################
+# Offer CUDA Support #
+######################
+INCLUDE(FindCUDA)
+find_package(CUDAToolkit)
+
+# Add policy flags
+cmake_policy(SET CMP0072 OLD)
+
 #################################
 # Add additional compiler flags #
 #################################
-
 IF(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libstdc++ -Wno-deprecated-declarations -Wno-unused-function")
 ENDIF()
